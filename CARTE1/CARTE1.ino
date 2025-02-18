@@ -33,6 +33,7 @@ Servo moteur;
 // unsigned long dureeMaxTemporisatonFeuJ = 0;
 unsigned long tempsMillis = 0;
 
+ String priorite;
 
 void setup() {
   // Initialisations pour la commmunication série des deux cartes
@@ -51,12 +52,31 @@ void setup() {
   // Initialisation des pins des leds du feu
   pinMode(ledsVR, OUTPUT);
   pinMode(ledsJ, OUTPUT);
+  digitalWrite(ledsVR, 1);
+  digitalWrite(ledsJ, 1);
 }
 
 void loop() {
-  afficherMessage(lcd1,"hello",10);
-  afficherMessage(lcd2,"coucou",10);
-  allumerFeu(1000,500);
+  if (Serial.available() > 1) {
+    priorite = Serial.readStringUntil('.');
+
+    Serial.println(priorite);
+  }
+  afficherMessage(lcd1, "hello", 10);
+  afficherMessage(lcd2, "coucou", 10);
+
+  if (priorite == "normal"){
+    allumerFeu(1000, 500,true);
+  }
+  else if(priorite == "priorite1"){
+    allumerFeu(1000, 500,false);
+    tournerServo(90, moteur);
+  }
+  else if(priorite == "priorite2"){
+    allumerFeu(1000, 500,false);
+    tournerServo(0, moteur);
+  }
+  
   // Test LCD
   // for (int i = duree; i >= 0; i--) {
   //   afficherMessage(lcd1, "STOP", i);
@@ -88,18 +108,22 @@ void tournerServo(int angle, Servo servomoteur) {
   servomoteur.write(angle);
 }
 
-void allumerFeu(int dureeMaxTemporisatonFeuRV, int dureeMaxTemporisatonFeuJ) {
+void allumerFeu(int dureeMaxTemporisatonFeuRV, int dureeMaxTemporisatonFeuJ, boolean modeAutomatique) {
   if ((millis() - tempsMillis) < dureeMaxTemporisatonFeuRV) {
     digitalWrite(ledsVR, 0);
     digitalWrite(ledsJ, 1);
-  tournerServo(90,moteur);
+    if (modeAutomatique) {
+      tournerServo(90, moteur);
+    }
   } else if (((SoustraireMillis() > dureeMaxTemporisatonFeuRV) && (SoustraireMillis() < dureeMaxTemporisatonFeuRV + dureeMaxTemporisatonFeuJ)) || ((SoustraireMillis() > dureeMaxTemporisatonFeuRV + dureeMaxTemporisatonFeuJ * 2) && (SoustraireMillis() < dureeMaxTemporisatonFeuRV + dureeMaxTemporisatonFeuJ * 3)) || ((SoustraireMillis() > dureeMaxTemporisatonFeuRV + dureeMaxTemporisatonFeuJ * 4) && (SoustraireMillis() < dureeMaxTemporisatonFeuRV + dureeMaxTemporisatonFeuJ * 5))) {
     digitalWrite(ledsVR, 1);
     digitalWrite(ledsJ, 0);
   } else if (((SoustraireMillis() > dureeMaxTemporisatonFeuRV + dureeMaxTemporisatonFeuJ * 5) && (SoustraireMillis() < (dureeMaxTemporisatonFeuRV * 2) + dureeMaxTemporisatonFeuJ * 6))) {
     digitalWrite(ledsVR, 0);
     digitalWrite(ledsJ, 1);
-  tournerServo(0,moteur);
+    if (modeAutomatique) {
+    tournerServo(0, moteur);
+    }
   } else {
     digitalWrite(ledsVR, 1);
     digitalWrite(ledsJ, 1);
@@ -110,5 +134,5 @@ void allumerFeu(int dureeMaxTemporisatonFeuRV, int dureeMaxTemporisatonFeuJ) {
 }
 long SoustraireMillis() {
   return millis() - tempsMillis;
-  tournerServo(90,moteur);
+  tournerServo(90, moteur);
 }

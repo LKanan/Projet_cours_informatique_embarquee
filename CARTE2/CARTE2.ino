@@ -39,8 +39,8 @@ void loop() {
   boolean priorite1 = prioriteVoie1(echoPin1, echoPin2, echoPin3);
   boolean priorite2 = prioriteVoie2(echoPin4, echoPin5, echoPin6);
   if (priorite1 && priorite2) {
-    // Serial.write("priorite1 et priorite2.");
-    Serial.println("priorite1 et priorite2.");
+    Serial.write("priorite1 et priorite2.");
+    // Serial.println("priorite1 et priorite2.");
   } else if (priorite1) {
     Serial.write("priorite1.");
     // Serial.print("priorite1. " );
@@ -59,7 +59,7 @@ void loop() {
     // Serial.println(mesureCapeurUltrason(echoPin6));
   }
   else{
-    Serial.println("normal.");
+    Serial.write("normal.");
   }
 }
 
